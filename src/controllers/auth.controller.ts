@@ -1,6 +1,9 @@
 import { NextFunction, request, Request, Response } from "express";
 import { asyncHandler } from "../utils/async-wrapper";
-import { signupValidation } from "../validations/auth.validation";
+import {
+  loginValidation,
+  signupValidation,
+} from "../validations/auth.validation";
 import { AppError } from "../utils/app.error";
 import User from "../models/user.model";
 import sendToken from "../utils/send-jwt";
@@ -10,35 +13,36 @@ export const signup = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     let { value, error } = signupValidation.validate(req.body);
     if (error) {
-      return new AppError(value.error.message, 400);
+      return next(new AppError(value.error.message, 400));
     }
 
     // Destructure the validated value
     let { email, password, username } = value;
     const user = await User.create({ email, password, username });
 
-    return sendToken(user._id, 201, res);
+    sendToken(user._id, 201, res);
   }
 );
 
 export const login = asyncHandler(
-  async (request: Request, response: Response) => {
-    const { email, password } = request.body;
-
-    // Check if email and password are provided
-    if (!email || !password) {
-      return new AppError("Please provide email and password", 400);
+  async (req: Request, res: Response, next: NextFunction) => {
+    // validaet the request body
+    const { value, error, warning } = loginValidation.validate(req.body);
+    if (error) {
+      return next(new AppError(error.message, 400));
     }
+
+    const { email, password } = value;
 
     // Check if user exists
     const user = await User.findOne({ email }).select("+password");
     if (!user || !(await user.comparePassword(password))) {
-      return new AppError("Incorrect email or password", 401);
+      return next(new AppError("Incorrect email or password", 401));
     }
 
+    console.log("User found", user);
+
     // Send JWT token
-    return sendToken(user._id, 200, response);
+    sendToken(user._id, 200, res);
   }
 );
-
-// export const login = asyncHandler()

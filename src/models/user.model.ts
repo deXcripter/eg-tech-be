@@ -23,8 +23,8 @@ interface IUserMethods {
 
 // Interface for the User model (static methods could go here)
 interface IUserModel extends Model<IUser, {}, IUserMethods> {
-  // Define any static methods here if needed
-  // Example: findByEmail(email: string): Promise<IUser>;
+  // Define any static methods here when needed
+  // EG: findByEmail(email: string): Promise<IUser>;
 }
 
 // Schema definition
@@ -61,13 +61,13 @@ const userSchema = new mongoose.Schema<IUser, IUserModel, IUserMethods>(
       required: [true, "Password is required"],
       minlength: [6, "Password must be at least 6 characters"],
       maxlength: [20, "Password cannot exceed 20 characters"],
-      select: false, // Prevents password from being returned in queries by default
+      select: false,
     },
   },
   { timestamps: true }
 );
 
-// Hash password before saving
+// Hash the new password before saving
 userSchema.pre<IUser>("save", async function (next) {
   if (!this.isModified("password")) return next();
 
