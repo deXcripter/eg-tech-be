@@ -1,81 +1,54 @@
-import mongoose, { Document, Model, Types } from "mongoose";
+import { model, Schema } from "mongoose";
+import { Model } from "mongoose";
+import { Types } from "mongoose";
+import slug from "slugify";
 
-export interface iProduct extends Document {
-  id: string;
+export interface iCategory {
+  _id: Types.ObjectId;
   name: string;
+  slug: string;
   description: string;
-  price: number;
-  category: Types.ObjectId;
-  subcategory?: Types.ObjectId;
-  images: string[];
-  specs: {
-    [key: string]: string | number | boolean;
-  };
-  inStock: boolean;
-  featured: boolean;
-  rating: number;
+  coverImage: string;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
 
-interface iProductMethods {}
+export interface iCategoryMethods {}
 
-export interface iProductModel extends Model<iProduct, {}, iProductMethods> {
+export interface iCategoryModel extends Model<iCategory, {}, iCategoryMethods> {
   // Define any static methods here when needed
-  // EG: findAProductByName(name: string): Promise<iProduct>;
+  // EG: findACategoryByName(name: string): Promise<iCategory>;
 }
 
-const productSchema = new mongoose.Schema<
-  iProduct,
-  iProductModel,
-  iProductMethods
->(
+const categorySchema = new Schema<iCategory, iCategoryModel, iCategoryMethods>(
   {
     name: {
       type: String,
-      required: [true, "Product name is required"],
+      required: [true, "Category name is required"],
       trim: true,
     },
+    slug: {
+      type: String,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+
     description: {
       type: String,
-      required: [true, "Product description is required"],
+      required: [true, "Category description is required"],
       trim: true,
-      minlength: 10,
-      maxlength: 5000,
     },
-    price: {
-      type: Number,
-      required: [true, "Product price is required"],
-      min: 0,
+
+    coverImage: {
+      type: String,
+      required: [true, "Category cover image is required"],
     },
-    category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
-      required: [true, "Product category is required"],
-    },
-    subcategory: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Subcategory",
-    },
-    images: {
-      type: [String],
-      required: [true, "Product images are required"],
-    },
-    specs: {
-      type: Object,
-      required: [true, "Product specifications are required"],
-    },
-    inStock: {
+
+    isActive: {
       type: Boolean,
       default: true,
-    },
-    featured: {
-      type: Boolean,
-      default: false,
-    },
-    rating: {
-      type: Number,
-      default: 0,
     },
   },
   {
@@ -83,9 +56,11 @@ const productSchema = new mongoose.Schema<
   }
 );
 
-const Product = mongoose.model<iProduct, iProductModel>(
-  "Product",
-  productSchema
-);
+categorySchema.pre("save", function (next) {
+  if (!this.isNew) return next();
+  this.slug = slug(this.name, { lower: true });
+  next();
+});
 
-export default Product;
+const Category = model<iCategory, iCategoryModel>("Category", categorySchema);
+export default Category;
