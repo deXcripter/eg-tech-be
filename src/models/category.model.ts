@@ -1,12 +1,12 @@
-import { Document } from "mongoose";
+import mongoose, { Document, Model, Types } from "mongoose";
 
 export interface iProduct extends Document {
   id: string;
   name: string;
   description: string;
   price: number;
-  category: string;
-  subcategory: string;
+  category: Types.ObjectId;
+  subcategory?: Types.ObjectId;
   images: string[];
   specs: {
     [key: string]: string | number | boolean;
@@ -17,3 +17,75 @@ export interface iProduct extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+interface iProductMethods {}
+
+export interface iProductModel extends Model<iProduct, {}, iProductMethods> {
+  // Define any static methods here when needed
+  // EG: findAProductByName(name: string): Promise<iProduct>;
+}
+
+const porductSchema = new mongoose.Schema<
+  iProduct,
+  iProductModel,
+  iProductMethods
+>(
+  {
+    name: {
+      type: String,
+      required: [true, "Product name is required"],
+      trim: true,
+    },
+    description: {
+      type: String,
+      required: [true, "Product description is required"],
+      trim: true,
+      minlength: 10,
+      maxlength: 5000,
+    },
+    price: {
+      type: Number,
+      required: [true, "Product price is required"],
+      min: 0,
+    },
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: [true, "Product category is required"],
+    },
+    subcategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subcategory",
+    },
+    images: {
+      type: [String],
+      required: [true, "Product images are required"],
+    },
+    specs: {
+      type: Object,
+      required: [true, "Product specifications are required"],
+    },
+    inStock: {
+      type: Boolean,
+      default: true,
+    },
+    featured: {
+      type: Boolean,
+      default: false,
+    },
+    rating: {
+      type: Number,
+      default: 0,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Category = mongoose.model<iProduct, iProductModel>(
+  "Product",
+  porductSchema
+);
+
+export default Category;
