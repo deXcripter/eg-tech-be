@@ -25,7 +25,7 @@ export interface iProductModel extends Model<iProduct, {}, iProductMethods> {
   // EG: findAProductByName(name: string): Promise<iProduct>;
 }
 
-const porductSchema = new mongoose.Schema<
+const productSchema = new mongoose.Schema<
   iProduct,
   iProductModel,
   iProductMethods
@@ -83,9 +83,9 @@ const porductSchema = new mongoose.Schema<
   }
 );
 
-const Category = mongoose.model<iProduct, iProductModel>(
+const Product = mongoose.model<iProduct, iProductModel>(
   "Product",
-  porductSchema
+  productSchema
 );
 
-export default Category;
+export default Product;

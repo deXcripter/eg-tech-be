@@ -15,7 +15,7 @@ export const GlobalErrorHandler = (
   else {
     // handle programming errors
     console.error("ERROR 💥", err);
-    return res.status(500).json({
+    res.status(500).json({
       status: "error",
       message: "Something went wrong!",
     });
