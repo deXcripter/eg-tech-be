@@ -1,16 +1,35 @@
 {
-  "name": "face-api",
+  "name": "evergreat-tech-express",
   "version": "1.0.0",
   "description": "",
+  "keywords": [
+    "e-commerce",
+    "backend",
+    "api"
+  ],
+  "homepage": "https://github.com/deXcripter/React_Native#readme",
+  "bugs": {
+    "url": "https://github.com/deXcripter/React_Native/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://@github.com/deXcripter/React_Native.git"
+  },
+  "license": "ISC",
+  "author": "Johnpaul Nnaji Obinna",
+  "type": "commonjs",
   "main": "server.js",
-  "dependencies": {
-    "express": "^4.18.2"
-  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC"
+  "dependencies": {
+    "@types/express": "^5.0.1",
+    "@types/morgan": "^1.9.9",
+    "cloudinary": "^2.6.0",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.13.3",
+    "slug": "^10.0.0"
+  }
 }
