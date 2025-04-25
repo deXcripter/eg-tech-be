@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/async-wrapper";
 import { signupValidation } from "../validations/auth.validation";
 import { AppError } from "../utils/app.error";
 import User from "../models/user.model";
+import sendToken from "../utils/send-jwt";
 
 export const signup = asyncHandler(
   // validate the request body
@@ -14,8 +15,10 @@ export const signup = asyncHandler(
 
     // Destructure the validated value
     let { email, password, username } = value;
-    await User.create({ email, password, username });
+    const user = await User.create({ email, password, username });
 
-    return res.status(201).json({ message: "Account created successfully" });
+    return sendToken(user._id, 201, res);
   }
 );
+
+// export const login = asyncHandler()
