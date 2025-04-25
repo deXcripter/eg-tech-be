@@ -25,15 +25,18 @@ interface CloudinaryDeleteResult {
  * @param folder Folder name in Cloudinary
  * @returns Promise that resolves with the image URL or rejects with an error
  */
-const uploadImage = (req: Request, folder: string): Promise<string> => {
+const uploadImage = (
+  file: Express.Multer.File,
+  folder: string
+): Promise<string> => {
   return new Promise(async (resolve, reject) => {
-    if (!req.file) {
+    if (!file) {
       return reject(new Error("No file provided"));
     }
 
-    const [type, ext] = req.file.mimetype.split("/");
+    const [type, ext] = file.mimetype.split("/");
     const filename = `${folder}-${Date.now()}`;
-    const path = req.file.path;
+    const path = file.path;
 
     // Validate image type
     if (type !== "image" || !["jpg", "jpeg", "png"].includes(ext)) {
@@ -102,4 +105,57 @@ const deleteImage = (folder: string, imageLink: string): Promise<void> => {
   });
 };
 
-export { uploadImage, deleteImage };
+const uploadImages = (
+  files: Express.Multer.File[],
+  folder: string
+): Promise<string[]> => {
+  if (!files || files.length === 0) {
+    return Promise.reject(new Error("No files provided"));
+  }
+
+  return Promise.all(files.map((file) => uploadImage(file, folder)));
+};
+
+/**
+ * const uploadImages = (req: Request): Promise<string[]> => {
+  const files = req.files as Express.Multer.File[];
+  if (!files || files.length === 0) {
+    throw new AppError("No files uploaded", 400);
+  }
+  return Promise.all(
+    files.map(async (file) => {
+      const imageUrl = uploadImage(file, FOLDER);
+      if (imageUrl instanceof Error) {
+        throw new BadRequestException(imageUrl);
+      }
+      return imageUrl;
+    })
+  );
+};
+
+/**
+ * Promise<string[]> {
+    try {
+      return await Promise.all(
+        files.map(async (file) => {
+          const imageUrl = await this.cloudinaryService.uploadImage(
+            file,
+            this.productFolder,
+          );
+          if (imageUrl instanceof Error) {
+            throw new BadRequestException(imageUrl);
+          }
+          return imageUrl;
+        }),
+      );
+    } catch (error) {
+      this.logger.error('Error uploading product images', error.stack);
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to upload images');
+    }
+  }
+ */
+
+export { uploadImage, deleteImage, uploadImages };

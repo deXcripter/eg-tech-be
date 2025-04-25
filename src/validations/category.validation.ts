@@ -45,13 +45,6 @@ export const productValidationSchema = Joi.object({
       "any.invalid": "Invalid subcategory ID format",
     }),
 
-  images: Joi.array().items(Joi.string().uri()).min(1).required().messages({
-    "array.base": "Images must be an array",
-    "array.min": "At least one image is required",
-    "string.uri": "Image must be a valid URL",
-    "any.required": "Product images are required",
-  }),
-
   specs: Joi.object()
     .pattern(
       /^[a-zA-Z0-9_]+$/, // Only allow alphanumeric + underscore keys

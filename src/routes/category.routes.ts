@@ -7,9 +7,13 @@ import {
   deleteCategory,
 } from "../controllers/category.controller";
 import { uploadSingleImage } from "../utils/multer";
+import { validateQuery } from "../middlewares/query";
 
 const router = express.Router();
 
-router.post("/", uploadSingleImage("coverImage"), createCategory);
+router
+  .route("/")
+  .post(uploadSingleImage("coverImage"), createCategory)
+  .get(validateQuery, getCategories);
 
 export { router as categoryRouter };

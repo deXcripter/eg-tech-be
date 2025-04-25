@@ -23,7 +23,7 @@ export const createCategory = asyncHandler(
     if (existing.length > 0)
       return next(new AppError("Category already exists", 400));
 
-    let image = await uploadImage(req, FOLDER);
+    let image = await uploadImage(req.file, FOLDER);
 
     const category = await Category.create({
       name,
