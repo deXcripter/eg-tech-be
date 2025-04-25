@@ -40,8 +40,6 @@ export const login = asyncHandler(
       return next(new AppError("Incorrect email or password", 401));
     }
 
-    console.log("User found", user);
-
     // Send JWT token
     sendToken(user._id, 200, res);
   }
