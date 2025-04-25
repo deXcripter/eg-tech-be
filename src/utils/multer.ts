@@ -1,10 +1,16 @@
 import multer from "multer";
 import path from "path";
 import { Request } from "express";
+import fs from "fs";
 
 const storage = multer.diskStorage({
   destination: function (req: Request, file: Express.Multer.File, cb) {
     const uploadPath = path.join(process.cwd(), "public", "images");
+
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+
     cb(null, uploadPath);
   },
   filename: function (req: Request, file: Express.Multer.File, cb) {
