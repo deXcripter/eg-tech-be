@@ -41,7 +41,37 @@ export const createCategory = asyncHandler(
 );
 
 export const getCategories = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const page = req.paginationQuery.page;
+    const limit = req.paginationQuery.limit;
+    const skip = (page - 1) * limit;
+    const sort = req.paginationQuery.sort;
+
+    const categories = await Category.find()
+      .skip(skip)
+      .limit(limit)
+      .sort(sort)
+      .select("-__v")
+      .lean();
+    const totalDocuments = await Category.countDocuments();
+
+    const totalPages = Math.ceil(totalDocuments / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        categories,
+      },
+      pagination: {
+        total: totalDocuments,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    });
+  }
 );
 
 export const getCategory = asyncHandler(
