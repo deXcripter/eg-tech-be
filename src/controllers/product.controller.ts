@@ -36,8 +36,9 @@ export const createProduct = asyncHandler(
       ? req.files
       : Object.values(req.files ?? {}).flat();
     const images = await uploadImages(filesArray, FOLDER);
-    if (images instanceof AppError || typeof images !== "string")
-      return next(images);
+    if (images.every((img) => typeof img !== "string")) {
+      return next(new AppError("Error uploading some images", 400));
+    }
 
     product.images = images;
 

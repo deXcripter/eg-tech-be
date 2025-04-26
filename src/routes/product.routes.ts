@@ -16,7 +16,7 @@ const router = express.Router();
 
 router
   .route("/")
-  .post(protect, onlyAdmin, uploadMultipleImages(), createProduct)
+  .post(protect, onlyAdmin, uploadMultipleImages("images"), createProduct)
   .get(validateQuery, getAllProducts);
 router
   .route("/:id")
