@@ -51,3 +51,27 @@ export const login = asyncHandler(
     sendToken(user._id, 200, res);
   }
 );
+
+export const adminLogin = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    // validaet the request body
+    const { value, error, warning } = loginValidation.validate(req.body);
+    if (error) {
+      return next(new AppError(error.message, 400));
+    }
+
+    const { email, password } = value;
+
+    // Check if user exists
+    const user = await User.findOne({ email }).select("+password");
+    if (!user || !(await user.comparePassword(password))) {
+      return next(new AppError("Incorrect email or password", 401));
+    }
+
+    if (user.role !== "admin")
+      return next(new AppError("You are not an admin", 401));
+
+    // Send JWT token
+    sendToken(user._id, 200, res);
+  }
+);
