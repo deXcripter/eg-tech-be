@@ -16,9 +16,16 @@ export const signup = asyncHandler(
       return next(new AppError(value.error.message, 400));
     }
 
+    const existingUsers = await User.findOne();
+
     // Destructure the validated value
     let { email, password, username } = value;
-    const user = await User.create({ email, password, username });
+    const user = await User.create({
+      email,
+      password,
+      username,
+      role: existingUsers ? "user" : "admin",
+    });
 
     sendToken(user._id, 201, res);
   }

@@ -1,6 +1,5 @@
 import http from "http";
 import dotenv from "dotenv";
-import mongoose from "mongoose";
 
 // configure the dotenv package
 dotenv.config();
