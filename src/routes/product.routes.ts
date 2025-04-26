@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createProduct,
+  deleteProduct,
   getAllProducts,
   getProduct,
 } from "../controllers/product.controller";
@@ -13,6 +14,6 @@ router
   .route("/")
   .post(uploadMultipleImages(), createProduct)
   .get(validateQuery, getAllProducts);
-router.route("/:id").get(getProduct);
+router.route("/:id").get(getProduct).delete(deleteProduct);
 
 export { router as productRouter };

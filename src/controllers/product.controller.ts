@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/async-wrapper";
 import { productValidationSchema } from "../validations/category.validation";
 import { AppError } from "../utils/app.error";
 import Product, { iProduct, iProductModel } from "../models/product.model";
-import { uploadImage, uploadImages } from "../utils/cloudinary";
+import { deleteImage, uploadImage, uploadImages } from "../utils/cloudinary";
 import Category from "../models/category.model";
 
 const FOLDER = "product";
@@ -103,6 +103,39 @@ export const getAllProducts = asyncHandler(
         currentPage: page,
         limit,
       },
+    });
+  }
+);
+
+export const deleteProduct = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    // Check if the product exists
+    const product = await Product.findById(id);
+    if (!product) {
+      return next(new AppError("Product not found", 404));
+    }
+
+    // Delete associated images from cloud storage
+    if (product.images && product.images.length > 0) {
+      const deleteResults = await Promise.all(
+        product.images.map(async (image) => {
+          try {
+            await deleteImage(FOLDER, image);
+          } catch (err) {
+            console.error(`Failed to delete image: ${image}`, err);
+          }
+        })
+      );
+    }
+
+    // Delete the product
+    await product.deleteOne();
+
+    res.status(204).json({
+      status: "success",
+      message: "Product deleted successfully",
     });
   }
 );
