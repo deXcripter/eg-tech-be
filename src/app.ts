@@ -8,6 +8,7 @@ import { homeRoute, notFoundRoute } from "./utils/default.routes";
 
 const app = express();
 
+app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(morgan("dev"));
 

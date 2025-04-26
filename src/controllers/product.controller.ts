@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/async-wrapper";
-import { productValidationSchema } from "../validations/category.validation";
+import {
+  productValidationSchema,
+  updateProductValidationSchema,
+} from "../validations/category.validation";
 import { AppError } from "../utils/app.error";
 import Product from "../models/product.model";
 import { deleteImage, uploadImage, uploadImages } from "../utils/cloudinary";
@@ -188,5 +191,60 @@ export const deleteProductImage = asyncHandler(
         )
       );
     }
+  }
+);
+
+export const updateProduct = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    let { value, error } = updateProductValidationSchema.validate(req.body);
+    console.log(value, error, req.body);
+    if (error || !value) {
+      return next(
+        new AppError(
+          error?.message ||
+            "Request validation error. Please pass the correct details",
+          400
+        )
+      );
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return next(new AppError("Product not found", 404));
+    }
+
+    // Check if the category exists
+    if (value.category && !(await Category.exists({ _id: value.category }))) {
+      return next(new AppError("Category not found", 404));
+    }
+
+    // Update product fields
+    Object.assign(product, value);
+
+    // Handle new images if provided
+    const filesArray = Array.isArray(req.files)
+      ? req.files
+      : Object.values(req.files ?? {}).flat();
+
+    if (filesArray.length > 0) {
+      const newImages = await uploadImages(filesArray, FOLDER);
+      if (newImages.every((img) => typeof img !== "string")) {
+        return next(new AppError("Error uploading some images", 400));
+      }
+
+      // Append new images to the existing images
+      product.images = [...product.images, ...newImages];
+    }
+
+    await product.save();
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        product,
+      },
+    });
   }
 );
