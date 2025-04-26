@@ -10,19 +10,20 @@ import {
 import { uploadMultipleImages } from "../utils/multer";
 import { validateQuery } from "../middlewares/query";
 import { protect } from "../middlewares/protection";
+import { onlyAdmin } from "../middlewares/admin.pass";
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(protect, uploadMultipleImages(), createProduct)
-  .get(protect, validateQuery, getAllProducts);
+  .post(protect, onlyAdmin, uploadMultipleImages(), createProduct)
+  .get(validateQuery, getAllProducts);
 router
   .route("/:id")
   .get(getProduct)
-  .delete(deleteProduct)
-  .patch(uploadMultipleImages("images"), updateProduct);
+  .delete(protect, onlyAdmin, deleteProduct)
+  .patch(protect, onlyAdmin, uploadMultipleImages("images"), updateProduct);
 
-router.delete("/image/:id", deleteProductImage);
+router.delete("/image/:id", protect, onlyAdmin, deleteProductImage);
 
 export { router as productRouter };

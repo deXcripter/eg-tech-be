@@ -75,13 +75,80 @@ export const getCategories = asyncHandler(
 );
 
 export const getCategory = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    if (!id) return next(new AppError("Category ID is required", 400));
+
+    const category = await Category.findById(id).select("-__v").lean();
+
+    if (!category) return next(new AppError("Category not found", 404));
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        category,
+      },
+    });
+  }
 );
 
 export const updateCategory = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { name, description } = req.body;
+
+    if (!id) return next(new AppError("Category ID is required", 400));
+    if (!name && !description && !req.file)
+      return next(
+        new AppError("At least one field to update must be provided", 400)
+      );
+
+    const category = await Category.findById(id);
+    if (!category) return next(new AppError("Category not found", 404));
+
+    if (name) {
+      const existing = await checkIfCategoryExists(name);
+      if (existing.length > 0 && existing[0]._id.toString() !== id)
+        return next(
+          new AppError("Category with this name already exists", 400)
+        );
+      category.name = name;
+    }
+
+    if (description) {
+      category.description = description;
+    }
+
+    if (req.file) {
+      const image = await uploadImage(req.file, FOLDER);
+      if (typeof image !== "string") return next(image);
+      category.coverImage = image;
+    }
+
+    await category.save();
+
+    return res.status(200).json({
+      status: "success",
+      data: {
+        category,
+      },
+    });
+  }
 );
 
 export const deleteCategory = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    if (!id) return next(new AppError("Category ID is required", 400));
+
+    const category = await Category.findByIdAndDelete(id);
+    if (!category) return next(new AppError("Category not found", 404));
+
+    return res.status(204).json({
+      status: "success",
+      message: "Category deleted successfully",
+    });
+  }
 );
