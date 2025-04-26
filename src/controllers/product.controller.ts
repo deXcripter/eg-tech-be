@@ -6,7 +6,7 @@ import {
 } from "../validations/category.validation";
 import { AppError } from "../utils/app.error";
 import Product from "../models/product.model";
-import { deleteImage, uploadImage, uploadImages } from "../utils/cloudinary";
+import { deleteImage, uploadImages } from "../utils/cloudinary";
 import Category from "../models/category.model";
 
 const FOLDER = "product";
@@ -199,7 +199,6 @@ export const updateProduct = asyncHandler(
     const { id } = req.params;
 
     let { value, error } = updateProductValidationSchema.validate(req.body);
-    console.log(value, error, req.body);
     if (error || !value) {
       return next(
         new AppError(

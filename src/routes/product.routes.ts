@@ -9,13 +9,14 @@ import {
 } from "../controllers/product.controller";
 import { uploadMultipleImages } from "../utils/multer";
 import { validateQuery } from "../middlewares/query";
+import { protect } from "../middlewares/protection";
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(uploadMultipleImages(), createProduct)
-  .get(validateQuery, getAllProducts);
+  .post(protect, uploadMultipleImages(), createProduct)
+  .get(protect, validateQuery, getAllProducts);
 router
   .route("/:id")
   .get(getProduct)
