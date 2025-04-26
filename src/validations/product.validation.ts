@@ -70,7 +70,8 @@ export const productValidationSchema = Joi.object({
   .min(1)
   .messages({
     "object.min": "Request body cannot be empty",
-  });
+  })
+  .unknown(true);
 
 function createPartialSchema(fullSchema: Joi.ObjectSchema) {
   const schemaKeys = fullSchema.$_terms.keys.reduce(
