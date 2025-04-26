@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/async-wrapper";
 import { productValidationSchema } from "../validations/category.validation";
 import { AppError } from "../utils/app.error";
-import Product from "../models/product.model";
+import Product, { iProduct, iProductModel } from "../models/product.model";
 import { uploadImage, uploadImages } from "../utils/cloudinary";
 import Category from "../models/category.model";
 
@@ -60,6 +60,48 @@ export const getProduct = asyncHandler(
       status: "success",
       data: {
         product,
+      },
+    });
+  }
+);
+
+export const getAllProducts = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const queryObj = {
+      ...(req.paginationQuery.query && {
+        name: { $regex: req.paginationQuery.query, $options: "i" },
+      }),
+      ...(req.paginationQuery.category && {
+        category: req.paginationQuery.category,
+      }),
+      ...(req.paginationQuery.inStock && {
+        inStock: req.paginationQuery.inStock,
+      }),
+      ...(req.paginationQuery.featured && {
+        featured: req.paginationQuery.featured,
+      }),
+    };
+
+    const limit = req.paginationQuery.limit || 10;
+    const page = req.paginationQuery.page || 1;
+    const skip = (page - 1) * limit;
+
+    // fetch the data
+    const products = await Product.find(queryObj).skip(skip).limit(limit);
+    const total = await Product.countDocuments(queryObj);
+
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    res.status(200).json({
+      data: products,
+      pagination: {
+        total,
+        hasNextPage,
+        hasPreviousPage,
+        currentPage: page,
+        limit,
       },
     });
   }
