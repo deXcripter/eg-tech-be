@@ -82,31 +82,62 @@ const uploadImage = (
  * @param imageLink URL of the image to delete
  * @returns Promise that resolves when deletion is complete or rejects with an error
  */
-const deleteImage = (folder: string, imageLink: string): Promise<void> => {
-  return new Promise(async (resolve, reject) => {
-    const publicId = imageLink.split("/").pop()?.split(".")[0];
-    if (!publicId) {
-      return reject(new AppError("Invalid image URL", 400));
-    }
+// FIXME : doesn't work yet
+const deleteImage = async (folder: string, imageUrl: string): Promise<void> => {
+  try {
+    let publicId: string;
 
-    const fullPublicId = `${folder}/${publicId}`;
+    if (!imageUrl.includes("cloudinary.com")) {
+      publicId = imageUrl;
+    } else {
+      const url = new URL(imageUrl);
+      const pathParts = url.pathname.split("/");
+      const uploadIndex = pathParts.indexOf("upload");
 
-    try {
-      const result: CloudinaryDeleteResult = await cloudinary.uploader.destroy(
-        fullPublicId
-      );
-
-      if (result.result !== "ok") {
-        const error = new Error(`Failed to delete image: ${result.result}`);
-        console.error(error.message);
-        return reject(error);
+      if (uploadIndex === -1) {
+        throw new AppError("Invalid Cloudinary URL format", 400);
       }
 
-      resolve();
-    } catch (error) {
-      reject(error);
+      const afterUpload = pathParts.slice(uploadIndex + 1);
+
+      const versionRegex = /^v\d+$/;
+      publicId = versionRegex.test(afterUpload[0])
+        ? afterUpload.slice(1).join("/")
+        : afterUpload.join("/");
+
+      publicId = publicId.replace(/\.[^/.]+$/, "");
+
+      if (folder && publicId.startsWith(`${folder}/`)) {
+        publicId = publicId.substring(folder.length + 1);
+      }
     }
-  });
+
+    const fullPublicId = folder ? `${folder}/${publicId}` : publicId;
+
+    console.log("Full deletion path:", fullPublicId);
+
+    const result = await cloudinary.uploader.destroy(fullPublicId, {
+      resource_type: "image",
+      type: "upload",
+      invalidate: true,
+    });
+
+    if (result.result !== "ok") {
+      throw new AppError(`Failed to delete: ${result.result}`, 400);
+    }
+
+    console.log("Successfully deleted:", fullPublicId);
+  } catch (error) {
+    console.error("Deletion failed:", {
+      error,
+      folder,
+      imageUrl,
+      timestamp: new Date().toISOString(),
+    });
+    throw error instanceof AppError
+      ? error
+      : new AppError("Failed to delete image", 500);
+  }
 };
 
 const uploadImages = async (

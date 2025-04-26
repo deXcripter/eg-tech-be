@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { asyncHandler } from "../utils/async-wrapper";
 import { productValidationSchema } from "../validations/category.validation";
 import { AppError } from "../utils/app.error";
-import Product, { iProduct, iProductModel } from "../models/product.model";
+import Product from "../models/product.model";
 import { deleteImage, uploadImage, uploadImages } from "../utils/cloudinary";
 import Category from "../models/category.model";
 
@@ -111,31 +111,82 @@ export const deleteProduct = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    // Check if the product exists
     const product = await Product.findById(id);
     if (!product) {
       return next(new AppError("Product not found", 404));
     }
 
-    // Delete associated images from cloud storage
-    if (product.images && product.images.length > 0) {
-      const deleteResults = await Promise.all(
+    // Delete associated images
+    if (product.images?.length > 0) {
+      const deletionErrors: string[] = [];
+
+      await Promise.all(
         product.images.map(async (image) => {
           try {
             await deleteImage(FOLDER, image);
           } catch (err) {
-            console.error(`Failed to delete image: ${image}`, err);
+            const message =
+              err instanceof AppError ? err.message : "Failed to delete image";
+            deletionErrors.push(`${image}: ${message}`);
           }
         })
       );
+
+      if (deletionErrors.length > 0) {
+        console.error("Some images failed to delete:", deletionErrors);
+        // Continue with product deletion even if image deletion fails
+      }
     }
 
-    // Delete the product
     await product.deleteOne();
 
     res.status(204).json({
       status: "success",
       message: "Product deleted successfully",
     });
+  }
+);
+
+export const deleteProductImage = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const { image } = req.body;
+
+    if (!image) {
+      return next(new AppError("Image URL is required", 400));
+    }
+
+    const product = await Product.findById(id);
+    if (!product) {
+      return next(new AppError("Product not found", 404));
+    }
+
+    const imageIndex = product.images.indexOf(image);
+    if (imageIndex === -1) {
+      return next(new AppError("Image not found in product", 404));
+    }
+
+    try {
+      // TODO: Fix the line below
+      // await deleteImage(FOLDER, image);
+
+      // Remove the image from the array
+      product.images.splice(imageIndex, 1);
+      await product.save({ validateBeforeSave: false });
+
+      res.status(200).json({
+        status: "success",
+        message: "Image deleted successfully",
+        data: { product },
+      });
+    } catch (err) {
+      console.error(`Failed to delete image: ${image}`, err);
+      return next(
+        new AppError(
+          err instanceof AppError ? err.message : "Failed to delete image",
+          err instanceof AppError ? err.statusCode : 500
+        )
+      );
+    }
   }
 );

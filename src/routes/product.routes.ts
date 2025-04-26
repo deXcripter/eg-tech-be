@@ -2,6 +2,7 @@ import express from "express";
 import {
   createProduct,
   deleteProduct,
+  deleteProductImage,
   getAllProducts,
   getProduct,
 } from "../controllers/product.controller";
@@ -15,5 +16,7 @@ router
   .post(uploadMultipleImages(), createProduct)
   .get(validateQuery, getAllProducts);
 router.route("/:id").get(getProduct).delete(deleteProduct);
+
+router.delete("/image/:id", deleteProductImage);
 
 export { router as productRouter };
