@@ -1,6 +1,7 @@
 import { v2 as cloudinary } from "cloudinary";
 import { Request } from "express";
 import fs from "fs/promises";
+import { AppError } from "./app.error";
 
 // Configure Cloudinary
 cloudinary.config({
@@ -28,10 +29,10 @@ interface CloudinaryDeleteResult {
 const uploadImage = (
   file: Express.Multer.File,
   folder: string
-): Promise<string> => {
+): Promise<string | AppError> => {
   return new Promise(async (resolve, reject) => {
     if (!file) {
-      return reject(new Error("No file provided"));
+      return reject(new AppError("No file provided", 400));
     }
 
     const [type, ext] = file.mimetype.split("/");
@@ -43,7 +44,10 @@ const uploadImage = (
       try {
         await fs.unlink(path);
         return reject(
-          new Error("Invalid file type. Only JPG, JPEG, and PNG are allowed.")
+          new AppError(
+            "Invalid file type. Only JPG, JPEG, and PNG are allowed.",
+            400
+          )
         );
       } catch (error) {
         return reject(error);
@@ -60,7 +64,7 @@ const uploadImage = (
       );
       resolve(image.secure_url);
     } catch (error) {
-      reject(error);
+      reject(new AppError(`Failed to upload image: ${error}`, 500));
     } finally {
       try {
         await fs.unlink(path);
@@ -82,7 +86,7 @@ const deleteImage = (folder: string, imageLink: string): Promise<void> => {
   return new Promise(async (resolve, reject) => {
     const publicId = imageLink.split("/").pop()?.split(".")[0];
     if (!publicId) {
-      return reject(new Error("Invalid image URL"));
+      return reject(new AppError("Invalid image URL", 400));
     }
 
     const fullPublicId = `${folder}/${publicId}`;
@@ -105,15 +109,23 @@ const deleteImage = (folder: string, imageLink: string): Promise<void> => {
   });
 };
 
-const uploadImages = (
+const uploadImages = async (
   files: Express.Multer.File[],
   folder: string
-): Promise<string[]> => {
+): Promise<string[] | AppError[]> => {
   if (!files || files.length === 0) {
-    return Promise.reject(new Error("No files provided"));
+    return Promise.reject(new AppError("No files provided", 400));
   }
 
-  return Promise.all(files.map((file) => uploadImage(file, folder)));
+  return Promise.all(files.map((file) => uploadImage(file, folder))).then(
+    (results) => {
+      if (results.every((result) => typeof result === "string")) {
+        return results as string[];
+      } else {
+        throw results as AppError[];
+      }
+    }
+  );
 };
 
 /**

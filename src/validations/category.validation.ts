@@ -50,7 +50,7 @@ export const productValidationSchema = Joi.object({
       /^[a-zA-Z0-9_]+$/, // Only allow alphanumeric + underscore keys
       Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean())
     )
-    .required()
+    // .required()
     .messages({
       "object.base": "Specifications must be an object",
       "any.required": "Product specifications are required",

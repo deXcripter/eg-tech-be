@@ -59,7 +59,7 @@ const productSchema = new mongoose.Schema<
     },
     images: {
       type: [String],
-      required: [true, "Product images are required"],
+      // required: [true, "Product images are required"],
     },
     specs: {
       type: Object,
