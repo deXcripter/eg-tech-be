@@ -11,9 +11,14 @@ const FOLDER = "product";
 export const createProduct = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     let { value, error } = productValidationSchema.validate(req.body);
-    console.log(value, error);
-    if (error) {
-      return next(new AppError(error.message, 400));
+    if (error || !value) {
+      return next(
+        new AppError(
+          error?.message ||
+            "Request validation error. Please pass the correct details",
+          400
+        )
+      );
     }
 
     if (!(await Category.exists({ _id: value.category }))) {

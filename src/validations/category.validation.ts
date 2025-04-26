@@ -64,4 +64,8 @@ export const productValidationSchema = Joi.object({
     "number.min": "Rating cannot be negative",
     "number.max": "Rating cannot exceed 5",
   }),
-}).options({ abortEarly: false });
+})
+  .min(1)
+  .messages({
+    "object.min": "Request body cannot be empty",
+  });
