@@ -45,16 +45,18 @@ export const productValidationSchema = Joi.object({
       "any.invalid": "Invalid subcategory ID format",
     }),
 
-  specs: Joi.object()
-    .pattern(
-      /^[a-zA-Z0-9_]+$/, // Only allow alphanumeric + underscore keys
-      Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean())
-    )
-    // .required()
-    .messages({
-      "object.base": "Specifications must be an object",
-      "any.required": "Product specifications are required",
-    }),
+  // specs: Joi.object()
+  //   .pattern(
+  //     /^[a-zA-Z0-9_]+$/, // Only allow alphanumeric + underscore keys
+  //     Joi.alternatives().try(Joi.string(), Joi.number(), Joi.boolean())
+  //   )
+  //   // .required()
+  //   .messages({
+  //     "object.base": "Specifications must be an object",
+  //     "any.required": "Product specifications are required",
+  //   }),
+
+  specs: Joi.string().required().trim(),
 
   inStock: Joi.boolean().default(true),
 

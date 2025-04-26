@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/async-wrapper";
 import {
   productValidationSchema,
   updateProductValidationSchema,
-} from "../validations/category.validation";
+} from "../validations/product.validation";
 import { AppError } from "../utils/app.error";
 import Product from "../models/product.model";
 import { deleteImage, uploadImages } from "../utils/cloudinary";
@@ -27,6 +27,8 @@ export const createProduct = asyncHandler(
     if (!(await Category.exists({ _id: value.category }))) {
       return next(new AppError("Category not found", 404));
     }
+
+    value.specs = JSON.parse(value.specs);
 
     const product = new Product(value);
 
