@@ -5,7 +5,7 @@ import {
   updateProductValidationSchema,
 } from "../validations/product.validation";
 import { AppError } from "../utils/app.error";
-import Product from "../models/product.model";
+import Product, { iProduct } from "../models/product.model";
 import { deleteImage, uploadImages } from "../utils/cloudinary";
 import Category from "../models/category.model";
 
@@ -105,8 +105,6 @@ export const getAllProducts = asyncHandler(
       }),
     };
 
-    console.log("Query Object:", queryObj);
-
     const limit = req.paginationQuery.limit || 10;
     const page = req.paginationQuery.page || 1;
     const skip = (page - 1) * limit;
@@ -175,7 +173,7 @@ export const deleteProduct = asyncHandler(
 export const deleteProductImage = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const { image } = req.query;
+    const { image } = req.query as { image: string };
 
     if (!image) {
       return next(new AppError("Image URL is required", 400));
@@ -199,7 +197,7 @@ export const deleteProductImage = asyncHandler(
       product.images.splice(imageIndex, 1);
       await product.save({ validateBeforeSave: false });
 
-      res.status(200).json({
+      res.status(204).json({
         status: "success",
         message: "Image deleted successfully",
         data: { product },
@@ -215,12 +213,14 @@ export const deleteProductImage = asyncHandler(
     }
   }
 );
-
 export const updateProduct = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    let { value, error } = updateProductValidationSchema.validate(req.body);
+    let { value, error } = updateProductValidationSchema.validate(req.body) as {
+      value: Partial<iProduct>;
+      error: Error | null;
+    };
     if (error || !value) {
       return next(
         new AppError(
@@ -237,11 +237,20 @@ export const updateProduct = asyncHandler(
     }
 
     // Check if the category exists
-    if (value.category && !(await Category.exists({ _id: value.category }))) {
+    if (
+      value.category &&
+      !(await Category.exists({
+        name: { $regex: `^${value.category}$`, $options: "i" },
+      }))
+    ) {
       return next(new AppError("Category not found", 404));
     }
 
+    // @ts-ignore
+    product.specs = JSON.parse(value.specs);
+
     // Update product fields
+    product.category = product.category.toLowerCase();
     Object.assign(product, value);
 
     // Handle new images if provided
