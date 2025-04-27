@@ -27,6 +27,8 @@ const categorySchema = new Schema<iCategory, iCategoryModel, iCategoryMethods>(
       type: String,
       required: [true, "Category name is required"],
       trim: true,
+      unique: true,
+      lowercase: true,
     },
     slug: {
       type: String,

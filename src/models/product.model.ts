@@ -5,8 +5,8 @@ export interface iProduct extends Document {
   name: string;
   description: string;
   price: number;
-  category: Types.ObjectId;
-  subcategory?: Types.ObjectId;
+  category: string;
+  subcategory?: string;
   images: string[];
   specs: {
     [key: string]: string | number | boolean;
@@ -49,13 +49,11 @@ const productSchema = new mongoose.Schema<
       min: 0,
     },
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Category",
+      type: String,
       required: [true, "Product category is required"],
     },
     subcategory: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Subcategory",
+      type: String,
     },
     images: {
       type: [String],

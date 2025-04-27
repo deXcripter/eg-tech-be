@@ -20,30 +20,17 @@ export const productValidationSchema = Joi.object({
     "any.required": "Product price is required",
   }),
 
-  category: Joi.string()
-    .required()
-    .custom((value, helpers) => {
-      if (!mongoose.Types.ObjectId.isValid(value)) {
-        return helpers.error("any.invalid");
-      }
-      return value;
-    })
-    .messages({
-      "string.empty": "Product category is required",
-      "any.invalid": "Invalid category ID format",
-      "any.required": "Product category is required",
-    }),
+  category: Joi.string().required().trim().messages({
+    "string.empty": "Product category is required",
+    "any.invalid": "Invalid category ID format",
+    "any.required": "Product category is required",
+  }),
 
-  subcategory: Joi.string()
-    .custom((value, helpers) => {
-      if (value && !mongoose.Types.ObjectId.isValid(value)) {
-        return helpers.error("any.invalid");
-      }
-      return value;
-    })
-    .messages({
-      "any.invalid": "Invalid subcategory ID format",
-    }),
+  subcategory: Joi.string().trim().messages({
+    "string.empty": "Product subcategory is required",
+    "any.invalid": "Invalid subcategory ID format",
+    "any.required": "Product subcategory is required",
+  }),
 
   // specs: Joi.object()
   //   .pattern(
