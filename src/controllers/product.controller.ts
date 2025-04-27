@@ -217,10 +217,7 @@ export const updateProduct = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
 
-    let { value, error } = updateProductValidationSchema.validate(req.body) as {
-      value: Partial<iProduct>;
-      error: Error | null;
-    };
+    let { value, error } = updateProductValidationSchema.validate(req.body);
     if (error || !value) {
       return next(
         new AppError(
@@ -246,11 +243,10 @@ export const updateProduct = asyncHandler(
       return next(new AppError("Category not found", 404));
     }
 
-    // @ts-ignore
-    product.specs = JSON.parse(value.specs);
-
     // Update product fields
-    product.category = product.category.toLowerCase();
+    if (value.specs) value.specs = JSON.parse(value.specs);
+    if (value.category) value.category = product.category.toLowerCase();
+
     Object.assign(product, value);
 
     // Handle new images if provided
