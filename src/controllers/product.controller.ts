@@ -24,7 +24,11 @@ export const createProduct = asyncHandler(
       );
     }
 
-    if (!(await Category.exists({ _id: value.category }))) {
+    if (
+      !(await Category.exists({
+        name: { $regex: `^${value.category}$`, $options: "i" },
+      }))
+    ) {
       return next(new AppError("Category not found", 404));
     }
 
