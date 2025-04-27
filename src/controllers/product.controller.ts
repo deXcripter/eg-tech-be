@@ -244,7 +244,10 @@ export const updateProduct = asyncHandler(
     }
 
     // Update product fields
-    if (value.specs) value.specs = JSON.parse(value.specs);
+    if (Object.entries(value.specs || {}).length > 0) {
+      console.log("specs", value.specs);
+      value.specs = JSON.parse(value.specs);
+    }
     if (value.category) value.category = product.category.toLowerCase();
 
     Object.assign(product, value);
