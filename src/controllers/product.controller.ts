@@ -90,7 +90,22 @@ export const getAllProducts = asyncHandler(
       ...(req.paginationQuery.featured && {
         featured: req.paginationQuery.featured,
       }),
+      ...(req.paginationQuery.minPrice && {
+        price: { $gte: req.paginationQuery.minPrice },
+      }),
+      ...(req.paginationQuery.maxPrice && {
+        price: {
+          ...(req.paginationQuery.minPrice && {
+            $gte: req.paginationQuery.minPrice,
+          }),
+          ...(req.paginationQuery.maxPrice && {
+            $lte: req.paginationQuery.maxPrice,
+          }),
+        },
+      }),
     };
+
+    console.log("Query Object:", queryObj);
 
     const limit = req.paginationQuery.limit || 10;
     const page = req.paginationQuery.page || 1;
