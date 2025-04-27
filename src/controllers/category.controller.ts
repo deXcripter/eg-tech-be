@@ -96,7 +96,7 @@ export const getCategory = asyncHandler(
 export const updateCategory = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const { name, description } = req.body;
+    const { name, description, isActive } = req.body;
 
     if (!id) return next(new AppError("Category ID is required", 400));
     // if (!name && !description && !req.file)
@@ -114,6 +114,10 @@ export const updateCategory = asyncHandler(
           new AppError("Category with this name already exists", 400)
         );
       category.name = name;
+    }
+
+    if (isActive !== undefined) {
+      category.isActive = isActive;
     }
 
     if (description) {
