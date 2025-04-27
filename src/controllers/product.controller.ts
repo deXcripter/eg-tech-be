@@ -175,7 +175,7 @@ export const deleteProduct = asyncHandler(
 export const deleteProductImage = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
-    const { image } = req.body;
+    const { image } = req.query;
 
     if (!image) {
       return next(new AppError("Image URL is required", 400));
