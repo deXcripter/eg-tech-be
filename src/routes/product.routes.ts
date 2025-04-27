@@ -4,6 +4,7 @@ import {
   deleteProduct,
   deleteProductImage,
   getAllProducts,
+  getFeaturedProducts,
   getProduct,
   updateProduct,
 } from "../controllers/product.controller";
@@ -14,6 +15,7 @@ import { onlyAdmin } from "../middlewares/admin.pass";
 
 const router = express.Router();
 
+router.route("/featured").get(validateQuery, getFeaturedProducts);
 router
   .route("/")
   .post(protect, onlyAdmin, uploadMultipleImages("images"), createProduct)

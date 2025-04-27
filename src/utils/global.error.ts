@@ -9,6 +9,7 @@ export const GlobalErrorHandler = (
 ) => {
   if (err.name === "ValidationError") err = handleValidationErrors(err, res);
   if (err.code === 11000) err = handleDuplicateErrors(err, res);
+  if (err.name === "CastError") err = handleCastErrors(err, res);
 
   // handle app errors first
   if (err.isOperational) handleOperationalErrors(err, res);
@@ -38,5 +39,9 @@ function handleValidationErrors(err: any, res: Response): AppError {
 
 function handleDuplicateErrors(err: any, res: Response): AppError {
   const message = `Duplicate field value: ${err.keyValue.email}. Please use another value!`;
+  return new AppError(message, 400);
+}
+function handleCastErrors(err: any, res: Response): AppError {
+  const message = `Invalid ${err.path}: ${err.value}.`;
   return new AppError(message, 400);
 }

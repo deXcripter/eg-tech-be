@@ -62,6 +62,8 @@ const querySchema = joi
 
 export const validateQuery: RequestHandler = async (req, res, next) => {
   try {
+    console.log("check");
+
     const { error, value } = querySchema.validate(req.query);
     if (error) {
       return next(
@@ -83,7 +85,8 @@ export const validateQuery: RequestHandler = async (req, res, next) => {
     req.paginationQuery = value as iQuery;
     next();
   } catch (error) {
-    next(error);
+    // @ts-ignore
+    next(new AppError(error.message || "Invalid query parameters", 400));
   }
 };
 

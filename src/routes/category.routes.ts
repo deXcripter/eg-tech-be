@@ -21,7 +21,7 @@ router
 router
   .route("/:id")
   .get(getCategory)
-  .patch(protect, onlyAdmin, updateCategory)
+  .patch(protect, onlyAdmin, uploadSingleImage("coverImage"), updateCategory)
   .delete(protect, onlyAdmin, deleteCategory);
 
 export { router as categoryRouter };

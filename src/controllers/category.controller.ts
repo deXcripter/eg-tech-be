@@ -99,10 +99,10 @@ export const updateCategory = asyncHandler(
     const { name, description } = req.body;
 
     if (!id) return next(new AppError("Category ID is required", 400));
-    if (!name && !description && !req.file)
-      return next(
-        new AppError("At least one field to update must be provided", 400)
-      );
+    // if (!name && !description && !req.file)
+    //   return next(
+    //     new AppError("At least one field to update must be provided", 400)
+    //   );
 
     const category = await Category.findById(id);
     if (!category) return next(new AppError("Category not found", 404));

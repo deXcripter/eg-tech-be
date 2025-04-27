@@ -277,3 +277,38 @@ export const updateProduct = asyncHandler(
     });
   }
 );
+
+export const getFeaturedProducts = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const limit = req.paginationQuery.limit || 10;
+    const page = req.paginationQuery.page || 1;
+    const skip = (page - 1) * limit;
+
+    const products = await Product.find({ featured: true })
+      .skip(skip)
+      .limit(limit);
+
+    if (!products) {
+      return next(new AppError("No featured products found", 404));
+    }
+
+    const total = await Product.countDocuments({ featured: true });
+    const totalPages = Math.ceil(total / limit);
+    const hasNextPage = page < totalPages;
+    const hasPreviousPage = page > 1;
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        products,
+        pagination: {
+          total,
+          hasNextPage,
+          hasPreviousPage,
+          currentPage: page,
+          limit,
+        },
+      },
+    });
+  }
+);
