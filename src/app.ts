@@ -5,7 +5,8 @@ import { authRouter } from "./routes/auth.routes";
 import { GlobalErrorHandler } from "./utils/global.error";
 import { productRouter } from "./routes/product.routes";
 import { categoryRouter } from "./routes/category.routes";
-import { homeRoute, notFoundRoute } from "./utils/default.routes";
+import { homeRoute, notFoundRoute } from "./routes/default.routes";
+import { heroRouter } from "./routes/hero.routes";
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use("/api/v1", homeRoute);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/category", categoryRouter);
+app.use("/api/v1/hero", heroRouter);
 app.use("/", notFoundRoute);
 app.use(GlobalErrorHandler);
 
