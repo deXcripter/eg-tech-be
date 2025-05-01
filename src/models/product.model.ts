@@ -41,7 +41,7 @@ const productSchema = new mongoose.Schema<
       required: [true, "Product description is required"],
       trim: true,
       minlength: 10,
-      maxlength: 5000,
+      maxlength: 50000,
     },
     price: {
       type: Number,
