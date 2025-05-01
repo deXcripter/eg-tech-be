@@ -257,15 +257,15 @@ export const updateProduct = asyncHandler(
       ? req.files
       : Object.values(req.files ?? {}).flat();
 
-    if (filesArray.length > 0) {
-      const newImages = await uploadImages(filesArray, FOLDER);
-      if (newImages.every((img) => typeof img !== "string")) {
-        return next(new AppError("Error uploading some images", 400));
-      }
+    // if (filesArray.length > 0) {
+    //   const newImages = await uploadImages(filesArray, FOLDER);
+    //   if (newImages.every((img) => typeof img !== "string")) {
+    //     return next(new AppError("Error uploading some images", 400));
+    //   }
 
-      // Append new images to the existing images
-      product.images = [...product.images, ...newImages];
-    }
+    //   // Append new images to the existing images
+    //   product.images = [...product.images, ...newImages];
+    // }
 
     await product.save();
 
