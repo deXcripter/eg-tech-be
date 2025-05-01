@@ -18,3 +18,7 @@ server.listen(process.env.PORT || 3000, async () => {
       process.exit(1);
     });
 });
+
+process.on("unhandledRejection", (err) => {
+  console.log(`Unhandled Rejection: ${err}`);
+});

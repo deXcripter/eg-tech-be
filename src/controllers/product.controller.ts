@@ -228,10 +228,14 @@ export const updateProduct = asyncHandler(
       );
     }
 
+    console.log(1);
+
     const product = await Product.findById(id);
     if (!product) {
       return next(new AppError("Product not found", 404));
     }
+
+    console.log(2);
 
     // Check if the category exists
     if (
@@ -243,12 +247,16 @@ export const updateProduct = asyncHandler(
       return next(new AppError("Category not found", 404));
     }
 
+    console.log(3);
+
     // Update product fields
     if (Object.entries(value.specs || {}).length > 0) {
       console.log("specs", value.specs);
       value.specs = JSON.parse(value.specs);
     }
     if (value.category) value.category = product.category.toLowerCase();
+
+    console.log(4);
 
     Object.assign(product, value);
 
@@ -267,7 +275,11 @@ export const updateProduct = asyncHandler(
     //   product.images = [...product.images, ...newImages];
     // }
 
+    console.log(5);
+
     await product.save();
+
+    console.log(6);
 
     res.status(200).json({
       status: "success",
