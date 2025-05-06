@@ -8,6 +8,7 @@ import { AppError } from "../utils/app.error";
 import Product, { iProduct } from "../models/product.model";
 import { deleteImage, uploadImages } from "../utils/cloudinary";
 import Category from "../models/category.model";
+import { Types } from "mongoose";
 
 const FOLDER = "product";
 
