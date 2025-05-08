@@ -5,16 +5,13 @@ import {
   updateHeroBanner,
   deleteHeroBanner,
 } from "../controllers/hero.controller";
+import { uploadSingleImage } from "../utils/multer";
 
 const router = express.Router();
 
 router
   .route("/")
-  .move((req, res, next) => {
-    console.log("move");
-    next();
-  })
-  .post(createHeroBanner)
+  .post(uploadSingleImage("image"), createHeroBanner)
   .get(getAllHeroBanner);
 
 export { router as heroRouter };

@@ -1,5 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { asyncHandler } from "../utils/async-wrapper";
+import { AppError } from "../utils/app.error";
+import Hero from "../models/hero.model";
+import { uploadImage } from "../utils/cloudinary";
+import Joi from "joi";
+
+const FOLDER = "hero";
 
 /**
  * @desc This controller creates a hero banner
@@ -7,7 +13,44 @@ import { asyncHandler } from "../utils/async-wrapper";
  * @route POST /api/v1/hero
  */
 export const createHeroBanner = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const schema = Joi.object({
+      title: Joi.string().required(),
+      description: Joi.string().required(),
+      highlight: Joi.string().required(),
+    });
+
+    const { error, value } = schema.validate(req.body);
+    if (error || !value) {
+      return next(
+        new AppError(error?.message || "No body passed to the request", 400)
+      );
+    }
+    const { title, description, highlight } = value;
+
+    if (!req.file) {
+      return new AppError("Please provide a file", 400);
+    }
+
+    const image = await uploadImage(req.file, FOLDER);
+    if (typeof image !== "string") return next(image);
+
+    const banner = new Hero({
+      title,
+      description,
+      highlight,
+      image,
+    });
+
+    await banner.save();
+
+    res.status(201).json({
+      status: "success",
+      data: {
+        banner,
+      },
+    });
+  }
 );
 
 export const updateHeroBanner = asyncHandler(

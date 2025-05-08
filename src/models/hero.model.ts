@@ -1,7 +1,6 @@
 import { Document, model, Model, Schema } from "mongoose";
 
 export interface iHeroData extends Document {
-  id: number;
   title: string;
   highlight: string;
   description: string;
@@ -17,11 +16,6 @@ export interface iHeroSchema extends Model<iHeroData, {}, iHeroMethods> {
 
 const heroSchema = new Schema<iHeroData, iHeroSchema, iHeroMethods>(
   {
-    id: {
-      type: Number,
-      required: [true, "Hero ID is required"],
-      unique: true,
-    },
     title: {
       type: String,
       required: [true, "Hero title is required"],
