@@ -62,5 +62,30 @@ export const deleteHeroBanner = asyncHandler(
 );
 
 export const getAllHeroBanner = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { page, limit } = req.paginationQuery;
+    const skip = (page - 1) * limit;
+
+    const heros = await Hero.find().sort({ createdAt: -1 }).skip(skip);
+
+    const total = await Hero.countDocuments();
+
+    const hasNextPage = page * limit + limit < total;
+    const hasPreviousPage = page > 1;
+    const totalPages = Math.ceil(total / limit);
+    res.status(200).json({
+      status: "success",
+      data: {
+        heros,
+      },
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages,
+        hasNextPage,
+        hasPreviousPage,
+      },
+    });
+  }
 );

@@ -6,12 +6,15 @@ import {
   deleteHeroBanner,
 } from "../controllers/hero.controller";
 import { uploadSingleImage } from "../utils/multer";
+import { onlyAdmin } from "../middlewares/admin.pass";
+import { protect } from "../middlewares/protection";
+import { validateQuery } from "../middlewares/query";
 
 const router = express.Router();
 
 router
   .route("/")
-  .post(uploadSingleImage("image"), createHeroBanner)
-  .get(getAllHeroBanner);
+  .post(protect, onlyAdmin, uploadSingleImage("image"), createHeroBanner)
+  .get(validateQuery, getAllHeroBanner);
 
 export { router as heroRouter };
