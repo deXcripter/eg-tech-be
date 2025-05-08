@@ -17,4 +17,9 @@ router
   .post(protect, onlyAdmin, uploadSingleImage("image"), createHeroBanner)
   .get(validateQuery, getAllHeroBanner);
 
+router
+  .route("/:id")
+  .patch(protect, onlyAdmin, uploadSingleImage("image"), updateHeroBanner)
+  .delete(protect, onlyAdmin, deleteHeroBanner);
+
 export { router as heroRouter };

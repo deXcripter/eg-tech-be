@@ -54,11 +54,56 @@ export const createHeroBanner = asyncHandler(
 );
 
 export const updateHeroBanner = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+    const schema = Joi.object({
+      title: Joi.string(),
+      description: Joi.string(),
+      highlight: Joi.string(),
+    });
+
+    const { error } = schema.validate(req.body);
+    if (error) return next(new AppError(error.message, 400));
+
+    const hero = await Hero.findByIdAndUpdate(
+      id,
+      {
+        ...req.body,
+      },
+      { new: true }
+    );
+
+    if (!hero) return next(new AppError("No hero found with that id", 404));
+
+    if (req.file) {
+      const image = await uploadImage(req.file, FOLDER);
+      if (typeof image !== "string") return next(image);
+
+      hero.image = image;
+      await hero.save();
+    }
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        hero,
+      },
+    });
+  }
 );
 
 export const deleteHeroBanner = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {}
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { id } = req.params;
+
+    const hero = await Hero.findByIdAndDelete(id);
+    if (!hero) return next(new AppError("No hero found with that id", 404));
+
+    res.status(204).json({
+      status: "success",
+      message: "Hero deleted successfully",
+    });
+  }
 );
 
 export const getAllHeroBanner = asyncHandler(
