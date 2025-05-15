@@ -1,8 +1,11 @@
 import express from "express";
-import { updateSitesSettings } from "../controllers/site.settings.controller";
+import {
+  getSiteSettings,
+  updateSitesSettings,
+} from "../controllers/site.settings.controller";
 
 const router = express.Router();
 
-router.route("/").patch(updateSitesSettings);
+router.route("/").patch(updateSitesSettings).get(getSiteSettings);
 
 export { router as settingsRouter };

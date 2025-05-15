@@ -82,3 +82,20 @@ export const updateSitesSettings = asyncHandler(
     });
   }
 );
+
+export const getSiteSettings = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const settings = await Settings.findById(siteDefaults._id);
+
+    if (!settings) {
+      return res.status(404).json({
+        message: "Settings not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Settings retrieved successfully",
+      data: { links: settings },
+    });
+  }
+);
