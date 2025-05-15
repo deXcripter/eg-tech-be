@@ -48,17 +48,14 @@ const SettingsSchema = new Schema<iSettings, iSettingsModel, iSettingsMethods>(
 
     whatsapp: {
       type: String,
-      required: [true, "Whatsapp number is required"],
     },
 
     email: {
       type: String,
-      required: [true, "Email is required"],
     },
 
     address: {
       type: String,
-      required: [true, "Address is required"],
     },
   },
   {
@@ -67,7 +64,7 @@ const SettingsSchema = new Schema<iSettings, iSettingsModel, iSettingsMethods>(
 );
 
 const Settings = model<iSettings, iSettingsModel>(
-  "EgreatStore",
+  "EvergreatSettings",
   SettingsSchema
 );
 export default Settings;
