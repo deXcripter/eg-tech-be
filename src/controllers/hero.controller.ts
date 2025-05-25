@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/async-wrapper";
 import { AppError } from "../utils/app.error";
 import Hero from "../models/hero.model";
 import { uploadImage } from "../utils/cloudinary";
-import Joi from "joi";
+import Joi, { link } from "joi";
 
 const FOLDER = "hero";
 
@@ -18,6 +18,7 @@ export const createHeroBanner = asyncHandler(
       title: Joi.string().required(),
       description: Joi.string().required(),
       highlight: Joi.string().required(),
+      link: Joi.string().uri().optional(),
     });
 
     const { error, value } = schema.validate(req.body);
@@ -26,7 +27,7 @@ export const createHeroBanner = asyncHandler(
         new AppError(error?.message || "No body passed to the request", 400)
       );
     }
-    const { title, description, highlight } = value;
+    const { title, description, highlight, link } = value;
 
     if (!req.file) {
       return new AppError("Please provide a file", 400);
@@ -40,6 +41,7 @@ export const createHeroBanner = asyncHandler(
       description,
       highlight,
       image,
+      link,
     });
 
     await banner.save();
@@ -60,6 +62,7 @@ export const updateHeroBanner = asyncHandler(
       title: Joi.string(),
       description: Joi.string(),
       highlight: Joi.string(),
+      link: Joi.string().uri().optional(),
     });
 
     const { error } = schema.validate(req.body);

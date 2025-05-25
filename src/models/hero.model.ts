@@ -5,6 +5,9 @@ export interface iHeroData extends Document {
   highlight: string;
   description: string;
   image: string;
+  link?: string; // Optional field for a link
+  createdAt?: Date; // Optional field for createdAt, will be managed by Mongoose
+  updatedAt?: Date; // Optional field for updatedAt, will be managed by Mongoose
 }
 
 export interface iHeroMethods {}
@@ -34,6 +37,11 @@ const heroSchema = new Schema<iHeroData, iHeroSchema, iHeroMethods>(
     image: {
       type: String,
       required: [true, "Hero image is required"],
+    },
+    link: {
+      type: String,
+      trim: true,
+      default: "", // Default to an empty string if no link is provided
     },
   },
   {
