@@ -5,8 +5,8 @@ export interface iProduct extends Document {
   name: string;
   description: string;
   price: number;
-  category: string;
-  subcategory?: string;
+  category: Types.ObjectId;
+  subcategory?: Types.ObjectId;
   images: string[];
   specs: {
     [key: string]: string | number | boolean;
@@ -21,8 +21,7 @@ export interface iProduct extends Document {
 interface iProductMethods {}
 
 export interface iProductModel extends Model<iProduct, {}, iProductMethods> {
-  // Define any static methods here when needed
-  // EG: findAProductByName(name: string): Promise<iProduct>;
+  findBySubcategoryAcrossCategories(subcategoryId: string): Promise<iProduct[]>;
 }
 
 const productSchema = new mongoose.Schema<
@@ -49,15 +48,16 @@ const productSchema = new mongoose.Schema<
       min: 0,
     },
     category: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
       required: [true, "Product category is required"],
     },
     subcategory: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Subcategory",
     },
     images: {
       type: [String],
-      // required: [true, "Product images are required"],
     },
     specs: {
       type: Object,
@@ -80,6 +80,15 @@ const productSchema = new mongoose.Schema<
     timestamps: true,
   }
 );
+
+// Static method to find products by subcategory across all categories
+productSchema.statics.findBySubcategoryAcrossCategories = async function (
+  subcategoryId: string
+) {
+  return this.find({ subcategory: subcategoryId })
+    .populate("category")
+    .populate("subcategory");
+};
 
 const Product = mongoose.model<iProduct, iProductModel>(
   "Product",

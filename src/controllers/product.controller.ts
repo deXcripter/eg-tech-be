@@ -8,6 +8,7 @@ import { AppError } from "../utils/app.error";
 import Product, { iProduct } from "../models/product.model";
 import { deleteImage, uploadImages } from "../utils/cloudinary";
 import Category from "../models/category.model";
+import Subcategory from "../models/subcategory.model";
 import { Types } from "mongoose";
 
 const FOLDER = "product";
@@ -25,12 +26,18 @@ export const createProduct = asyncHandler(
       );
     }
 
-    if (
-      !(await Category.exists({
-        name: { $regex: `^${value.category}$`, $options: "i" },
-      }))
-    ) {
+    // Verify category exists
+    const categoryExists = await Category.findById(value.category);
+    if (!categoryExists) {
       return next(new AppError("Category not found", 404));
+    }
+
+    // Verify subcategory exists if provided
+    if (value.subcategory) {
+      const subcategoryExists = await Subcategory.findById(value.subcategory);
+      if (!subcategoryExists) {
+        return next(new AppError("Subcategory not found", 404));
+      }
     }
 
     value.specs = JSON.parse(value.specs);
@@ -40,14 +47,19 @@ export const createProduct = asyncHandler(
     const filesArray = Array.isArray(req.files)
       ? req.files
       : Object.values(req.files ?? {}).flat();
-    const images = await uploadImages(filesArray, FOLDER);
-    if (images.every((img) => typeof img !== "string")) {
-      return next(new AppError("Error uploading some images", 400));
+
+    if (filesArray.length > 0) {
+      const images = await uploadImages(filesArray, FOLDER);
+      if (images.every((img) => typeof img !== "string")) {
+        return next(new AppError("Error uploading some images", 400));
+      }
+      product.images = images;
     }
 
-    product.images = images;
-
     await product.save();
+
+    // Populate the saved product
+    await product.populate(["category", "subcategory"]);
 
     res.status(201).json({
       status: "success",
@@ -85,10 +97,10 @@ export const getAllProducts = asyncHandler(
       ...(req.paginationQuery.category && {
         category: req.paginationQuery.category,
       }),
-      ...(req.paginationQuery.inStock && {
+      ...(req.paginationQuery.inStock !== undefined && {
         inStock: req.paginationQuery.inStock,
       }),
-      ...(req.paginationQuery.featured && {
+      ...(req.paginationQuery.featured !== undefined && {
         featured: req.paginationQuery.featured,
       }),
       ...(req.paginationQuery.minPrice && {
@@ -110,8 +122,13 @@ export const getAllProducts = asyncHandler(
     const page = req.paginationQuery.page || 1;
     const skip = (page - 1) * limit;
 
-    // fetch the data
-    const products = await Product.find(queryObj).skip(skip).limit(limit);
+    // fetch the data with populated references
+    const products = await Product.find(queryObj)
+      .populate("category", "name slug description")
+      .populate("subcategory", "name slug description")
+      .skip(skip)
+      .limit(limit);
+
     const total = await Product.countDocuments(queryObj);
 
     const totalPages = Math.ceil(total / limit);
@@ -214,6 +231,7 @@ export const deleteProductImage = asyncHandler(
     }
   }
 );
+
 export const updateProduct = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
@@ -229,35 +247,31 @@ export const updateProduct = asyncHandler(
       );
     }
 
-    console.log(1);
-
     const product = await Product.findById(id);
     if (!product) {
       return next(new AppError("Product not found", 404));
     }
 
-    console.log(2);
-
-    // Check if the category exists
-    if (
-      value.category &&
-      !(await Category.exists({
-        name: { $regex: `^${value.category}$`, $options: "i" },
-      }))
-    ) {
-      return next(new AppError("Category not found", 404));
+    // Verify category exists if being updated
+    if (value.category) {
+      const categoryExists = await Category.findById(value.category);
+      if (!categoryExists) {
+        return next(new AppError("Category not found", 404));
+      }
     }
 
-    console.log(3);
+    // Verify subcategory exists if being updated
+    if (value.subcategory) {
+      const subcategoryExists = await Subcategory.findById(value.subcategory);
+      if (!subcategoryExists) {
+        return next(new AppError("Subcategory not found", 404));
+      }
+    }
 
     // Update product fields
     if (Object.entries(value.specs || {}).length > 0) {
-      console.log("specs", value.specs);
       value.specs = JSON.parse(value.specs);
     }
-    if (value.category) value.category = product.category.toLowerCase();
-
-    console.log(4);
 
     Object.assign(product, value);
 
@@ -266,21 +280,19 @@ export const updateProduct = asyncHandler(
       ? req.files
       : Object.values(req.files ?? {}).flat();
 
-    // if (filesArray.length > 0) {
-    //   const newImages = await uploadImages(filesArray, FOLDER);
-    //   if (newImages.every((img) => typeof img !== "string")) {
-    //     return next(new AppError("Error uploading some images", 400));
-    //   }
-
-    //   // Append new images to the existing images
-    //   product.images = [...product.images, ...newImages];
-    // }
-
-    console.log(5);
+    if (filesArray.length > 0) {
+      const newImages = await uploadImages(filesArray, FOLDER);
+      if (newImages.every((img) => typeof img !== "string")) {
+        return next(new AppError("Error uploading some images", 400));
+      }
+      // Append new images to the existing images
+      product.images = [...product.images, ...newImages];
+    }
 
     await product.save();
 
-    console.log(6);
+    // Populate the updated product
+    await product.populate(["category", "subcategory"]);
 
     res.status(200).json({
       status: "success",
