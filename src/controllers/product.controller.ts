@@ -237,6 +237,9 @@ export const updateProduct = asyncHandler(
     const { id } = req.params;
 
     let { value, error } = updateProductValidationSchema.validate(req.body);
+
+    console.log(value);
+
     if (error || !value) {
       return next(
         new AppError(
@@ -248,6 +251,7 @@ export const updateProduct = asyncHandler(
     }
 
     const product = await Product.findById(id);
+    console.log(product);
     if (!product) {
       return next(new AppError("Product not found", 404));
     }
