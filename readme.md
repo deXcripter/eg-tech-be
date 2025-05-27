@@ -42,10 +42,8 @@
 
 1. **Clone the repository**
 
-// TODO: Confirm the URL
-
 ```bash
-git clone https://github.com/deXcripter/evergreat-tech.git
+git clone https://github.com/deXcripter/eg-tech-be.git
 cd eg-express
 ```
 
