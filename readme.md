@@ -42,10 +42,12 @@
 
 1. **Clone the repository**
 
-   ```bash
-   git clone https://github.com/deXcripter/React_Native.git
-   cd eg-express
-   ```
+// TODO: Confirm the URL
+
+```bash
+git clone https://github.com/deXcripter/evergreat-tech.git
+cd eg-express
+```
 
 2. **Install dependencies**
 
@@ -538,18 +540,6 @@ npm start
 pm2 start dist/server.js --name "evergreat-api"
 ```
 
-### Docker Deployment (Optional)
-
-```dockerfile
-FROM node:16-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY dist ./dist
-EXPOSE 3000
-CMD ["node", "dist/server.js"]
-```
-
 ## 🤝 Contributing
 
 We welcome contributions! Please follow these steps:
@@ -627,7 +617,7 @@ We welcome contributions! Please follow these steps:
 ## 📞 Support
 
 - **Email**: support@evergreattech.com
-- **Developer**: Johnpaul Nnaji Obinna
+- **Developer**: Johnpaul Nnaji
 - **GitHub**: [@deXcripter](https://github.com/deXcripter)
 
 ## 📄 License
@@ -645,5 +635,3 @@ This project is licensed under the **ISC License** - see the [LICENSE](LICENSE) 
 ---
 
 **Built with ❤️ by Johnpaul (deXcripter)**
-
-_Making e-commerce backend development simple and scalable._

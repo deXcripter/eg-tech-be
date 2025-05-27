@@ -22,10 +22,7 @@ interface IUserMethods {
 }
 
 // Interface for the User model (static methods could go here)
-interface IUserModel extends Model<IUser, {}, IUserMethods> {
-  // Define any static methods here when needed
-  // EG: findByEmail(email: string): Promise<IUser>;
-}
+interface IUserModel extends Model<IUser, {}, IUserMethods> {}
 
 // Schema definition
 const userSchema = new mongoose.Schema<IUser, IUserModel, IUserMethods>(

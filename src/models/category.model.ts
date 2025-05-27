@@ -16,10 +16,8 @@ export interface iCategory {
 
 export interface iCategoryMethods {}
 
-export interface iCategoryModel extends Model<iCategory, {}, iCategoryMethods> {
-  // Define any static methods here when needed
-  // EG: findACategoryByName(name: string): Promise<iCategory>;
-}
+export interface iCategoryModel
+  extends Model<iCategory, {}, iCategoryMethods> {}
 
 const categorySchema = new Schema<iCategory, iCategoryModel, iCategoryMethods>(
   {

@@ -12,10 +12,7 @@ export interface iHeroData extends Document {
 
 export interface iHeroMethods {}
 
-export interface iHeroSchema extends Model<iHeroData, {}, iHeroMethods> {
-  // Define any static methods here when needed
-  // EG: findAHeroByName(name: string): Promise<iHeroData>;
-}
+export interface iHeroSchema extends Model<iHeroData, {}, iHeroMethods> {}
 
 const heroSchema = new Schema<iHeroData, iHeroSchema, iHeroMethods>(
   {
